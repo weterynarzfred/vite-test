@@ -1,5 +1,11 @@
 @use "variables" as *;
 
 #App .content {
-  max-width: 30rem;
+  max-width: 50rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacingQuarter;
 }

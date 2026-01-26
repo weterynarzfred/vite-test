@@ -1,3 +1,7 @@
 export default function Home() {
-  return <h1>Home</h1>;
+
+  return <div id="Home">
+    <h1>Home</h1>
+    <a href="https://duckduckgo.com" target="_blank" rel="noopener noreferrer">duckduckgo</a>
+  </div>;
 }
