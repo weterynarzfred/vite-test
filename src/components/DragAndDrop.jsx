@@ -1,75 +1,83 @@
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import DropZone from "./DropZone";
 
 export default function DragAndDrop({ words, children }) {
-  console.log(children);
-
-  const wordList = words.split(",").map(w => w.trim());
-  const parts = children.split("___");
-
-  const [filled, setFilled] = useState(
-    Array(parts.length - 1).fill(null)
+  const wordList = useMemo(
+    () => words.split(";").map((w) => w.trim()).filter(Boolean),
+    [words]
   );
 
-  function onDrop(index, word) {
-    setFilled(prev => {
-      const next = [...prev];
-      next[index] = word;
-      return next;
-    });
-  }
+  const [zones, setZones] = useState({});
+  const [available, setAvailable] = useState(wordList);
+  const [isCheckingAnswers, setIsCheckingAnswers] = useState(false);
 
-  function onDragStart(e, word) {
-    e.dataTransfer.setData("text/plain", word);
-  }
+  const nextZoneId = useRef(0);
+
+  const handleDrop = (zoneId, word) => {
+    setZones(prev => ({ ...prev, [zoneId]: word }));
+    setAvailable(prev => prev.filter(w => w !== word));
+  };
+
+  const enhance = node => {
+    if (!React.isValidElement(node)) return node;
+
+    const children = node.props?.children
+      ? React.Children.map(node.props.children, enhance)
+      : node.props.children;
+
+    if (node.type === DropZone) {
+      const id = nextZoneId.current++;
+      return React.cloneElement(node, {
+        zoneId: id,
+        value: zones[id],
+        onDrop: handleDrop,
+        setAvailable: setAvailable,
+        isCheckingAnswers: isCheckingAnswers,
+        children,
+      });
+    }
+
+    if (children !== node.props.children)
+      return React.cloneElement(node, undefined, children);
+
+    return node;
+  };
+
+  nextZoneId.current = 0;
+  const enhancedTree = React.Children.map(children, enhance);
 
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
-      <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
-        {wordList.map(word => (
-          <div
+    <div className="DragAndDrop">
+      <div className="words" style={{
+        minHeight: '1.3rem',
+        display: 'flex',
+        gap: '.5rem',
+      }}>
+        {available.map(word => (
+          <span
             key={word}
             draggable
-            onDragStart={e => onDragStart(e, word)}
+            onDragStart={e => e.dataTransfer.setData("text/plain", word)}
             style={{
-              padding: "6px 10px",
-              border: "1px solid #333",
-              cursor: "grab",
-              background: "#f0f0f0"
+              borderBottom: "1px solid #ccc",
+              minWidth: 80,
+              height: '1.3em',
+              display: 'inline-block',
+              padding: '0 .2rem',
+              backgroundColor: '#fff1',
+              cursor: 'grab',
             }}
           >
             {word}
-          </div>
+          </span>
         ))}
       </div>
-
-      <div>
-        {parts.map((part, i) => (
-          <React.Fragment key={i}>
-            {part}
-            {i < filled.length && (
-              <span
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => {
-                  const word = e.dataTransfer.getData("text/plain");
-                  onDrop(i, word);
-                }}
-                style={{
-                  display: "inline-block",
-                  minWidth: 60,
-                  minHeight: '2rem',
-                  padding: "2px 6px",
-                  margin: "0 4px",
-                  borderBottom: "2px solid black",
-                  textAlign: "center",
-                  verticalAlign: "middle",
-                }}
-              >
-                {filled[i] || ""}
-              </span>
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      <div>{enhancedTree}</div>
+      <button onClick={() => {
+        setAvailable(wordList);
+        setZones({});
+      }}>reset</button>
+      <button onClick={() => setIsCheckingAnswers(prev => !prev)}>check answers</button>
     </div>
   );
 }

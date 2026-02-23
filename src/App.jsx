@@ -1,8 +1,14 @@
 import { Route, Routes } from "react-router-dom";
 import Nav from "./components/Nav";
 import Home from "./pages/Home";
-import About from "./pages/About";
 import Article from "./pages/Article";
+
+function About() {
+  return <div>
+    <h1>About</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum laborum cum sunt nam repellat quos delectus voluptate commodi minus, incidunt ex necessitatibus voluptates maxime nisi, nostrum consectetur a beatae ipsum.</p>
+  </div>;
+}
 
 function App() {
 

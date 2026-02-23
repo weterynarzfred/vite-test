@@ -29,9 +29,9 @@ $resLarge: 1280px;
 $resTablet: 900px;
 $resPhone: 450px;
 
-$colorContent: #111;
-$colorBg: #eee;
+$colorContent: #eee;
+$colorBg: #222;
 
 @mixin fontDefault() {
-  font-family: sans-serif;
+  font-family: "Crimson Text", serif;
 }
